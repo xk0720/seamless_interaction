@@ -56,8 +56,8 @@ This dataset enables the development of AI technologies that understand human in
 ## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/facebookresearch/seamless-interaction
-cd seamless-interaction
+git clone https://github.com/facebookresearch/seamless_interaction
+cd seamless_interaction
 pip install -e .
 streamlit run src/seamless_interaction/app/Welcome.py
 
