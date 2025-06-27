@@ -10,7 +10,7 @@
 <table>
 <tr>
 <td align="center">
-<a href="https://ai.meta.com/blog/seamless-interaction-dataset-natural-conversation-dynamics">
+<a href="https://ai.meta.com/blog/seamless-interaction-natural-conversational-dynamics/">
 🖼️ Blog
 </a>
 </td>
