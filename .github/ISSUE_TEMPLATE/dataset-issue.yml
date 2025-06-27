@@ -1,0 +1,110 @@
+name: 📊 Dataset Issue
+description: Report issues with dataset files, data quality, or missing data
+labels: [dataset, data-quality, 'status: needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for reporting issues specifically related to the Seamless Interaction dataset content, including:Add commentMore actions
+
+        - **Missing files**: Expected files that cannot be downloaded or are not available
+        - **Corrupted data**: Files that are corrupted, truncated, or unreadable
+        - **Data quality issues**: Problems with annotations, transcripts, or metadata
+        - **Format inconsistencies**: Files that don't match expected formats or schemas
+        - **Licensing or access issues**: Problems accessing specific dataset portions
+        - **Performance issues**: Extremely slow downloads or data loading
+
+        **For bugs with the code/utilities**, please use the "🐛 Bug Report" template instead.
+        **For documentation issues**, please use the "📚 Documentation" template instead.
+
+        Please be as specific as possible about the affected files, including file IDs, batch numbers, or specific data splits.
+
+  - type: checkboxes
+    attributes:
+      label: Have you read the Contributing Guidelines?
+      options:
+        - label: I have read the [Contributing Guidelines](https://github.com/facebookresearch/seamless_interaction/blob/main/CONTRIBUTING.md).
+          required: true
+
+  - type: dropdown
+    attributes:
+      label: Issue Type
+      description: What type of dataset issue are you reporting?
+      options:
+        - Missing files or data
+        - Corrupted or unreadable files
+        - Data quality issues (annotations, transcripts, metadata)
+        - Format inconsistencies
+        - Access or permission issues
+        - Performance issues (slow downloads)
+        - Other data-related issue
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Dataset Label
+      description: Which dataset label is affected?
+      options:
+        - improvised
+        - naturalistic
+        - Both
+        - Unknown/Not applicable
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Dataset Split
+      description: Which dataset split is affected?
+      options:
+        - train
+        - dev
+        - test
+        - Multiple splits
+        - All splits
+        - Unknown/Not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Affected Files/Data and Issue Description
+      description: |
+        Please specify the exact files, file IDs, batch numbers, or data ranges affected.
+        Be as specific as possible to help us locate and fix the issue.
+        Describe the issue you're experiencing with the dataset.
+      placeholder: |
+        Examples:
+        - File ID: V00_S0809_I00000582_P0947
+        - Batch: improvised/train/0000 (entire batch)
+        - Archive: improvised/dev/0000/0023.tar
+        - Files matching pattern: V01_S*_I*_P0500-P0600
+        - All files in session S0809
+        - "Missing .npz files for entire batch improvised/train/0005"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Use download script: `python scripts/download_s3.py`
+        2. Attempt to download file ID: V00_S0809_I00000582_P0947
+        3. File download fails with error...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Any other context, workarounds you've tried, or related issues.
+
+  - type: checkboxes
+    attributes:
+      label: Self-service
+      description: |
+        If you feel like you could help investigate or verify this data issue, please check the box below.
+      options:
+        - label: I'd be willing to help investigate this data issue. Add comment

@@ -1,0 +1,21 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+runs:
+  using: composite
+  steps:
+    - name: "Install UV"
+      shell: bash
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+    - name: "Install libsndfile"
+      shell: bash
+      run: |
+        sudo apt-get install libsndfile1 python3-setuptools
+    - name: "Install the project"
+      shell: bash
+      run: |
+        uv sync

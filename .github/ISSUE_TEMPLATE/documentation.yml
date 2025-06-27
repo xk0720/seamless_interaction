@@ -1,0 +1,99 @@
+name: 📚 Documentation
+description: Report an issue or request improvements to dataset documentation
+labels: [documentation, 'status: needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for documentation requests related to the Seamless Interaction dataset, including:
+
+        - Documenting undocumented dataset features, utility functions, or APIs
+        - Clarifying unclear instructions in the README or examples
+        - Improving code examples and tutorials
+        - Fixing broken or outdated links
+        - Adding missing documentation for new dataset splits, formats, or features
+        - Enhancing setup and installation guides
+
+        If you followed the documentation but the code doesn't work, consider whether it's a documentation issue or a code bug. For code bugs, please use the "bug" template instead.
+
+        We welcome documentation improvements! If your documentation request is:
+
+        - Relevant to users of the Seamless Interaction dataset
+        - About core dataset functionality, download methods, or data loading
+        - Not already covered elsewhere in the documentation
+
+        You may proceed directly to sending a pull request, and we can improve on your work.
+        If you're not able to contribute yourself, this issue is still welcomed.
+
+  - type: checkboxes
+    attributes:
+      label: Have you read the Contributing Guidelines?
+      options:
+        - label: I have read the [Contributing Guidelines](https://github.com/facebookresearch/seamless_interaction/blob/main/CONTRIBUTING.md).
+          required: true
+
+  - type: dropdown
+    attributes:
+      label: Documentation Type
+      description: What type of documentation issue is this?
+      options:
+        - Missing documentation
+        - Unclear or confusing documentation
+        - Outdated documentation
+        - Incorrect examples
+        - Broken links
+        - Installation/setup issues
+        - API reference improvements
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Documentation Issue Description
+      description: A clear and concise description of the documentation issue or improvement needed.
+      placeholder: |
+        Examples:
+        - "The download_s3.py example doesn't show how to handle authentication errors"
+        - "Missing documentation for the new batch download feature"
+        - "README installation steps don't work on Windows"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Affected Documentation
+      description: Which specific documentation files, sections, or examples are affected?
+      placeholder: |
+        Examples:
+        - README.md - Quick Start section
+        - scripts/download_hf.py - Line 25-30
+        - Website documentation
+        - Code comments in fs.py
+
+  - type: textarea
+    attributes:
+      label: Suggested Improvement
+      description: If you have ideas for how to improve the documentation, please share them here.
+      placeholder: |
+        Examples:
+        - Add error handling examples
+        - Include Windows-specific installation steps
+        - Add more detailed API documentation
+        - Fix broken link to point to correct URL
+
+  - type: textarea
+    attributes:
+      label: Current Documentation Problem
+      description: What specifically is confusing, missing, or incorrect in the current documentation?
+      placeholder: |
+        Example: "Users can't figure out how to authenticate with S3 because the error messages aren't documented and the examples don't show credential setup."
+
+  - type: checkboxes
+    attributes:
+      label: Self-service
+      description: |
+        If you feel like you could contribute to this documentation improvement, please check the box below.
+        If you do check this box, please send a pull request within 7 days.
+      options:
+        - label: I'd be willing to address this documentation request myself.

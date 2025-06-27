@@ -1,0 +1,127 @@
+name: 🐛 Bug Report
+description: Report a bug with the Seamless Interaction dataset or utility functions
+labels: [bug, 'status: needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Please help us help you!
+
+        Before filing your issue, ask yourself:
+        - Is this clearly a Seamless Interaction dataset or utility function defect?
+        - Do I have basic ideas about where it goes wrong? (For example, if there are stack traces, are they pointing to specific scripts or functions?)
+        - Could it be because of my own setup, network issues, or incorrect usage?
+
+        **The GitHub issue tracker is not a support forum**. If you are not sure whether it could be your mistake, ask in the [GitHub discussions](https://github.com/facebookresearch/seamless_interaction/discussions) first. The quickest way to verify whether it's a dataset/utility defect is through a **reproduction** with a minimal example.
+
+        Make the bug obvious. Ideally, we should be able to understand it without running any code.
+
+        Bugs are fixed faster if you include:
+        - A minimal reproduction script
+        - Specific file IDs or batch numbers that cause the issue
+        - Complete error messages and stack traces
+        - Your environment details (Python version, OS, etc.)
+
+  - type: checkboxes
+    attributes:
+      label: Have you read the Contributing Guidelines?
+      options:
+        - label: I have read the [Contributing Guidelines](https://github.com/facebookresearch/seamless_interaction/blob/main/CONTRIBUTING.md).
+          required: true
+
+  - type: checkboxes
+    attributes:
+      label: Prerequisites
+      description: Please check the following items before creating an issue. This way we know you've done these steps first.
+      options:
+        - label: I'm using the latest version of the seamless-interaction package.
+          required: true
+        - label: I have verified my network connection and S3/HuggingFace access.
+        - label: I have tried with a fresh virtual environment and clean installation.
+        - label: I have tested with a minimal reproduction case.
+        - label: I have read the error message carefully and checked the logs.
+
+  - type: textarea
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the issue you're experiencing with the dataset download, data loading, or utility functions.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Reproduction Script
+      description: |
+        Provide a minimal script that reproduces the issue. This is extremely helpful for debugging.
+        
+        ```python
+        # Example:
+        from seamless_interaction.fs import SeamlessInteractionFS
+        # ... minimal code that reproduces the bug
+        ```
+      placeholder: |
+        ```python
+        # Your minimal reproduction code here
+        ```
+
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: Write down the exact steps to reproduce the bug.
+      placeholder: |
+        1. Install package with `pip install -e .`
+        2. Run script with specific parameters...
+        3. Error occurs when...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Describe what should have happened (e.g., "File should download successfully", "Data should load without errors").
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Actual Behavior
+      description: |
+        What actually happened? Include the complete error message and stack trace.
+        Please don't just say "it doesn't work" - be specific!
+      placeholder: |
+        Include the full error message and stack trace:
+        ```
+        Traceback (most recent call last):
+          File ...
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Environment Information
+      description: Include relevant details about your environment.
+      value: |
+        - seamless-interaction version:
+        - Python version:
+        - Operating system:
+        - Network/internet access:
+        - Specific file IDs or batch numbers affected:
+        - Download method (S3/HuggingFace):
+        - Local storage available:
+
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here (logs, screenshots, related issues, etc.)
+
+  - type: checkboxes
+    attributes:
+      label: Self-service
+      description: |
+        If you feel like you could contribute to fixing this issue, please check the box below.
+        If you do check this box, please send a pull request within 7 days.
+      options:
+        - label: I'd be willing to help fix this bug myself.
