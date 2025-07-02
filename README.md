@@ -414,7 +414,7 @@ The dataset is organized in self-contained batches for flexible exploration:
 | Split | Batches | Size per Batch | Total Size | Description |
 |-------|---------|----------------|------------|-------------|
 | **dev** | 5 | ~50GB | ~500GB | Development/validation set |
-| **test** | 5 | ~50GB | ~500TB | Hold-out test set |
+| **test** | 5 | ~50GB | ~500GB | Hold-out test set |
 | **train** | 200+ | ~50GB | ~20TB+ | Full training data |
 
 #### Recommended Download Strategies
