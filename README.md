@@ -264,6 +264,9 @@ The Seamless Interaction Dataset is organized into two main categories/labels:
 
 ```
 seamless_interaction
+├── interactions.csv          # Metadata for prompts
+├── participants.csv          # Metadata for participants
+├── relationships.csv         # Metadata for participant relationships per session
 ├── improvised                # Interactions with guided prompts
 │   ├── dev
 │   │   ├── 1P-IS/            # First-party internal state annotations
