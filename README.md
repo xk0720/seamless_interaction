@@ -148,11 +148,12 @@ import numpy as np
 import cv2
 import librosa
 
+fs = SeamlessInteractionFS()
+
 # Load interaction data
 def load_interaction_data(file_id):
     """Load all modalities for a given file ID."""
     
-    fs = SeamlessInteractionFS()
     paths = fs.get_path_list_for_file_id_local(file_id)
     print(paths)
     
@@ -239,7 +240,10 @@ The repository provides comprehensive tools for downloading, processing, and uti
 seamless_interaction/
 ├── assets/               # Static assets for documentation
 │   ├── banner.png
-│   └── filelist.csv      # File list for the dataset
+│   ├── filelist.csv      # Complete file listing with metadata and availability flags (_e.g._ annotations, imitator movement features)
+│   ├── interactions.csv  # Interaction metadata with prompt hashes and IPC classifications
+│   ├── participants.csv  # Participant information and demographics
+│   └── relationships.csv # Relationship information between participants per sessions
 ├── scripts/              # Example scripts for dataset usage
 │   ├── dataloader_webdataset.py
 │   ├── download_hf.py
@@ -261,6 +265,29 @@ seamless_interaction/
 The Seamless Interaction Dataset is organized into two main categories/labels:
 - **Improvised**: Interactions primarily based on predefined scenarios with guided prompts with at least one professional actor.
 - **Naturalistic**: Prompted conversations that can be carried out by normal people.
+
+### Dataset Metadata and File Organization
+
+The dataset includes comprehensive metadata files in the `assets/` directory:
+
+#### `assets/filelist.csv`
+Complete listing of all files in the dataset with metadata columns:
+- `has_annotation_1p`: Indicates availability of first-party annotations (`0` = not available, `1` = available)
+- `has_annotation_3p`: Indicates availability of third-party annotations (`0` = not available, `1` = available) 
+- `has_imitator_movement`: Indicates availability of imitator movement features (`0` = not available, `1` = available)
+
+#### `assets/interactions.csv`
+Interaction-level metadata including:
+- `prompt_hash`: Corresponds to the interaction ID (`I<interaction>`) in the file naming convention
+- `ipc_a`/`ipc_b`: Interpersonal Circumplex (IPC) classifications using acronyms like ANCP/AMCM/AMCP, where:
+  - **A/C** refer to **Agency** and **Communion** dimensions
+  - **N/M/P** refer to **Negative/Moderate/Positive** values on the 2D IPC space
+- `CGST`: Category containing prompts based on cognitive states
+
+**Note**: The same prompt (interaction ID) can be provided to multiple vendors and sessions with different participants.
+
+#### `assets/participants.csv` and `assets/relationships.csv`
+Additional metadata about participants and their relationships during interactions.
 
 ```
 seamless_interaction
@@ -338,9 +365,12 @@ Each interaction in the dataset includes:
 | 🔊 VAD | Voice activity detection | JSONL | 100 Hz |
 | 📦 Keypoints | Face and body keypoints | NPY | 30 Hz |
 
+**Note**: Not all modalities are available for every file. The `assets/filelist.csv` contains availability flags (`has_annotation_1p`, `has_annotation_3p`, `has_imitator_movement`) indicating which files have associated annotations and movement features.
+
 #### Annotation Types
 
-The dataset includes several types of human annotations for rich behavioral analysis:
+The dataset includes several types of human annotations for rich behavioral analysis.
+The `assets/filelist.csv` includes availability flags (`has_annotation_1p` and `has_annotation_3p`) indicating which files have associated annotations:
 
 | Annotation | Hours | Total Annotations | Mean # Tokens |
 |------------|-------------|--------|--------|
@@ -351,25 +381,28 @@ The dataset includes several types of human annotations for rich behavioral anal
 | 3P-V (3rd-party visual annotation) | 4.7 | 5132 | 14.6 |
 
 Please refer to the [technical report](https://ai.meta.com/research/publications/seamless-interaction-dyadic-audiovisual-motion-modeling-and-large-scale-dataset/) for a more detailed overview of annotations.
+The current filelist contains a subset of annotated files.
+More annotations will be continuously updated and released.
 
 #### Movement/Imitator Feature Types
 
-The movement directory contains rich behavioral features (output of the Imitator model):
+The movement directory contains rich behavioral features (output of the Imitator model). The `assets/filelist.csv` includes a `has_imitator_movement` column (`0` = not available, `1` = available) indicating which files have these features:
 
 | Feature | Description |
 |---------|-------------|
-| `emotion_arousal` | Arousal intensity measurements |
-| `emotion_valence` | Valence (positive/negative) measurements |
+| `emotion_arousal` / `EmotionArousalToken` | Arousal intensity measurements ranging from -1 to 1. Higher values indicate stronger emotion representations. Token version is the quantized arousal value. |
+| `emotion_valence` / `EmotionValenceToken` | Valence (positive/negative) measurements ranging from -1 to 1. Lower values represent negative emotion, higher values indicate positive emotion. Token version is the quantized valence value. |
 | `emotion_scores` | Detected emotion categorical scores |
-| `expression` | Parametric facial expression encodings |
-| `FAUToken`/`FAUValue` | Facial Action Unit tokens and intensity values |
-| `gaze_encodings` | Neural encodings of gaze direction |
+| `FAUToken`/`FAUValue` | Facial Action Unit tokens and intensity values. FAUValue maps to 24 dimensions including `InnerBrowRaiser`, `OuterBrowRaiser`, `BrowLowerer`, `UpperLidRaiser`, `CheekRaiser`, `LidTightener`, `NoseWrinkler`, `UpperLipRaiser`, `LipCornerPuller`, `CheekPuffer`, `Dimpler`, `LipCornerDepressor`, `LowerLipDepressor`, `ChinRaiser`, `LipPuckerer`, `LipStretcher`, `LipFunneler`, `LipTightener`, `LipPressor`, `LipsParts`, `JawDrop`, `LipSuck`, `JawSideways`, and `EyesClosed`. FAUToken is generated by quantizing FAU values into a single vector for easier prediction tasks. |
+| `gaze_encodings` | Neural encodings of gaze direction from computed blendshapes |
 | `head_encodings` | Neural encodings of head position and rotation |
-| `frame_latent` | Per-frame latent representations |
-| `alignment_head_rotation` | Head rotation data for temporal alignment |
-| `alignment_translation` | Translation parameters for temporal alignment |
-| `EmotionArousalToken`/`EmotionValenceToken` | Discretized emotion tokens |
-| `hypernet_features` | Features from hypernetwork processing |
+| `expression` | Parametric facial expression encodings (HyperModel related) |
+| `frame_latent` | Per-frame latent representations (HyperModel related) |
+| `alignment_head_rotation` | Head rotation data for temporal alignment (HyperModel related) |
+| `alignment_translation` | Translation parameters for temporal alignment (HyperModel related) |
+| `hypernet_features` | Features from hypernetwork processing (HyperModel related) |
+
+**Note**: Features marked as "HyperModel related" (`frame_latent`, `expression`, `alignment_head_rotation`, `hypernet_features`, `alignment_translation`) are extracted from or designed for proprietary models that are not yet being released publicly.
 
 ### Download Strategy Guide
 
