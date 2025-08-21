@@ -132,8 +132,8 @@ def main():
     # Uncomment desired download scenario:
     # download_1gb_sample_archive()
     # download_single_batch()
-    # download_multiple_batches()
-    download_different_splits()
+    download_multiple_batches()
+    # download_different_splits()
     # download_whole_dataset()  # ⚠️ CAUTION: Very large!
 
 
