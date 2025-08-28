@@ -35,13 +35,18 @@ def download_single_batch():
     print("✅ Downloaded single batch (~50-100GB)")
 
 
-def download_multiple_batches():
+def download_multiple_batches(local_dir=None):
     """
     Download multiple batches for training datasets.
 
     Suitable for model training and large-scale analysis.
     """
-    config = DatasetConfig(label="improvised", split="train", num_workers=8)
+    config = DatasetConfig(
+        label="improvised",
+        split="train",
+        num_workers=8,
+        local_dir=local_dir,
+    )
     fs = SeamlessInteractionFS(config=config)
 
     # Download first 3 batches of training data (~150GB+)
@@ -129,10 +134,12 @@ def main():
     print("4. Different splits (improvised/naturalistic, train/dev/test)")
     print("5. Whole dataset (~27TB)")
 
+    local_dir = "D:\kongxiangyu\datasets"
+
     # Uncomment desired download scenario:
     # download_1gb_sample_archive()
     # download_single_batch()
-    download_multiple_batches()
+    download_multiple_batches(local_dir=local_dir)
     # download_different_splits()
     # download_whole_dataset()  # ⚠️ CAUTION: Very large!
 
