@@ -319,6 +319,9 @@ class VideoCropper(object):
         cap = cv2.VideoCapture(input_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
 
+        print(f"left: {left}, right: {right}, top: {top}, bottom: {bottom}")
+        exit()
+
         out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps,
                               (self.target_size, self.target_size))
 
@@ -400,6 +403,15 @@ def main(args):
     #     except:
     #         break
     #     logger.error(f"Error processing {record[0]}: {record[1]}")
+
+
+def check_frame_size():
+    src_video_path = "C:/Users/herui/Downloads/V01_S1881_I00000189_P2767_cropped.mp4"
+    cap = cv2.VideoCapture(src_video_path)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    print(f"fps: {fps}, height: {height}, width: {width}")
 
 
 if __name__ == '__main__':
