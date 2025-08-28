@@ -71,8 +71,8 @@ class VideoCropper(object):
             '.webm', '.m4v', '.mpg', '.mpeg', '.3gp', '.ts'
         }
 
-        self.video_files = ["C:/Users/herui/Downloads/V01_S1881_I00000189_P2767.mp4"]
-        self.cropped_files = ["C:/Users/herui/Downloads/V01_S1881_I00000189_P2767_cropped.mp4"]
+        self.video_files = ["C:/Users/herui/Downloads/V01_S0308_I00001235_P1618.mp4"]
+        self.cropped_files = ["C:/Users/herui/Downloads/V01_S0308_I00001235_P1618_cropped.mp4"]
 
         # # Walk through all folders and subfolders
         # for folder_path, subfolders, files in os.walk(root_dir):
@@ -199,6 +199,7 @@ class VideoCropper(object):
                 # here raise a potential exception
                 assert os.path.exists(input_path), (
                     "Input video file does not exist: {}".format(input_path))
+                print(f"Input video file exist: {input_path}")
 
                 cap = cv2.VideoCapture(input_path)
                 num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -228,9 +229,15 @@ class VideoCropper(object):
                 pbar = tqdm(total=num_frames, desc="Processing Frames",
                             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]")
 
+                maximum_frame_count = 300
+                frame_count = 0
                 while cap.isOpened():
                     ret, frame = cap.read()
                     if not ret:
+                        break
+
+                    frame_count += 1
+                    if frame_count > maximum_frame_count:
                         break
 
                     # frame_count += 1
@@ -308,6 +315,7 @@ class VideoCropper(object):
 
                 # write video to /output_path
                 self.video_write(input_path, output_path, left, right, top, bottom)
+                logger.info(f"left: {left}, right: {right}, top: {top}, bottom: {bottom}")
 
             except Exception as e:
                 error_type = type(e).__name__
@@ -318,9 +326,6 @@ class VideoCropper(object):
     def video_write(self, input_path, output_path, left, right, top, bottom):
         cap = cv2.VideoCapture(input_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
-
-        print(f"left: {left}, right: {right}, top: {top}, bottom: {bottom}")
-        exit()
 
         out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps,
                               (self.target_size, self.target_size))
@@ -374,24 +379,30 @@ def main(args):
     cropped_files = video_cropper.cropped_files
     record_queue = Queue()
 
-    video_batches = []
-    cropped_batches = []
-    bs = len(video_files) // num_workers
-    for i in range(num_workers):
-        start_idx = i * bs
-        video_batches.append(video_files[start_idx:start_idx + bs])
-        cropped_batches.append(cropped_files[start_idx:start_idx + bs])
+    video_cropper.face_cropping(
+        input_paths=video_files,
+        output_paths=cropped_files,
+        record_queue=record_queue,
+    )
 
-    processes = []
-    for i in range(num_workers):
-        p = Process(target=video_cropper.face_cropping,
-                    args=(video_batches[i], cropped_batches[i], record_queue))
-        p.start()
-        processes.append(p)
-
-    for p in processes:
-        p.join()
-    logger.info("All processing workers have completed")
+    # video_batches = []
+    # cropped_batches = []
+    # bs = len(video_files) // num_workers
+    # for i in range(num_workers):
+    #     start_idx = i * bs
+    #     video_batches.append(video_files[start_idx:start_idx + bs])
+    #     cropped_batches.append(cropped_files[start_idx:start_idx + bs])
+    #
+    # processes = []
+    # for i in range(num_workers):
+    #     p = Process(target=video_cropper.face_cropping,
+    #                 args=(video_batches[i], cropped_batches[i], record_queue))
+    #     p.start()
+    #     processes.append(p)
+    #
+    # for p in processes:
+    #     p.join()
+    # logger.info("All processing workers have completed")
 
     # logger.info("Saving error messages to .txt")
     # while True:

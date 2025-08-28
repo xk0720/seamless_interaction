@@ -134,7 +134,7 @@ def main():
     print("4. Different splits (improvised/naturalistic, train/dev/test)")
     print("5. Whole dataset (~27TB)")
 
-    local_dir = "D:\kongxiangyu\datasets\seamless_interaction"
+    local_dir = "D:/kongxiangyu/datasets/seamless_interaction"
 
     # Uncomment desired download scenario:
     # download_1gb_sample_archive()
