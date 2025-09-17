@@ -57,27 +57,41 @@ def download_multiple_batches(local_dir=None):
     print("✅ Downloaded multiple batches (~150GB+)")
 
 
-def download_different_splits():
+def download_different_splits(local_dir=None):
     """
     Download data from different splits and labels.
 
     Covers both improvised/naturalistic and train/dev/test splits.
     """
     # Download from different combinations
-    splits_to_download = [
-        ("improvised", "dev", 0),
-        ("naturalistic", "dev", 0),
-        ("improvised", "test", 0),
-        ("naturalistic", "test", 0),
-    ]
+    # splits_to_download = [
+    #     ("improvised", "dev", 0),
+    #     ("naturalistic", "dev", 0),
+    #     ("improvised", "test", 0),
+    #     ("naturalistic", "test", 0),
+    # ]
+
+    split_ranges = {
+        "train": range(10),  # 0-9
+        "dev": range(4),  # 0-3
+        "test": range(4),  # 0-3
+    }
+
+    # 生成所有组合
+    splits_to_download = []
+    for label in ["improvised", "naturalistic"]:
+        for split, batch_range in split_ranges.items():
+            for batch_idx in batch_range:
+                splits_to_download.append((label, split, batch_idx))
 
     for label, split, batch_idx in splits_to_download:
-        config = DatasetConfig(label=label, num_workers=4)
+        config = DatasetConfig(label=label, num_workers=4, local_dir=local_dir,)
         fs = SeamlessInteractionFS(config=config)
 
         # Download only first few archives to keep size manageable (~1GB per split)
         fs.download_batch_from_hf(
-            split=split, batch_idx=batch_idx, archive_list=[0, 1, 2]
+            # download all archives
+            split=split, batch_idx=batch_idx, # archive_list=[0, 1, 2]
         )
         print(f"✅ Downloaded {label}/{split} sample")
 
@@ -134,13 +148,13 @@ def main():
     print("4. Different splits (improvised/naturalistic, train/dev/test)")
     print("5. Whole dataset (~27TB)")
 
-    local_dir = "D:/kongxiangyu/datasets/seamless_interaction"
+    local_dir = "/root/autodl-tmp/datasets/seamless_interaction"
 
     # Uncomment desired download scenario:
     # download_1gb_sample_archive()
     # download_single_batch()
-    download_multiple_batches(local_dir=local_dir)
-    # download_different_splits()
+    # download_multiple_batches(local_dir=local_dir)
+    download_different_splits(local_dir=local_dir)
     # download_whole_dataset()  # ⚠️ CAUTION: Very large!
 
 
