@@ -77,7 +77,6 @@ def download_different_splits(local_dir=None):
         "test": range(4),  # 0-3
     }
 
-    # 生成所有组合
     splits_to_download = []
     for label in ["improvised", "naturalistic"]:
         for split, batch_range in split_ranges.items():
