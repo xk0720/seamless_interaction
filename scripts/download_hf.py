@@ -72,7 +72,7 @@ def download_different_splits(local_dir=None):
     # ]
 
     split_ranges = {
-        "train": range(10),  # 0-9
+        "train": range(8),  # 0-9
         "dev": range(4),  # 0-3
         "test": range(4),  # 0-3
     }
