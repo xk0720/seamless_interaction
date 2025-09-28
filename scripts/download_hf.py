@@ -147,7 +147,9 @@ def main():
     print("4. Different splits (improvised/naturalistic, train/dev/test)")
     print("5. Whole dataset (~27TB)")
 
-    local_dir = "/root/autodl-tmp/datasets/seamless_interaction"
+    # local_dir = "/root/autodl-tmp/datasets/seamless_interaction"
+    local_dir = ("/lustre/projects/Research_Project-T127204/xk219/projects/"
+                 "datasets/conversation_interact_data/seamless_interaction")
 
     # Uncomment desired download scenario:
     # download_1gb_sample_archive()
