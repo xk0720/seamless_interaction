@@ -17,9 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 class FAN(object):
-    def __init__(self):
+    def __init__(self, device='gpu'):
         import face_alignment
-        self.model = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, flip_input=False)
+        self.model = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, flip_input=False, device=device)
 
     def run(self, image):
         '''
@@ -67,12 +67,12 @@ class VideoCropper(object):
 
         # Common video file extensions
         video_extensions = {
-            '.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv',
-            '.webm', '.m4v', '.mpg', '.mpeg', '.3gp', '.ts'
+            '.mp4', '.avi',
+            # '.mov', '.mkv', '.wmv', '.flv', '.webm', '.m4v', '.mpg', '.mpeg', '.3gp', '.ts'
         }
 
-        self.video_files = ["C:/Users/herui/Downloads/V01_S0308_I00001235_P1618.mp4"]
-        self.cropped_files = ["C:/Users/herui/Downloads/V01_S0308_I00001235_P1618_cropped.mp4"]
+        self.video_files = ["/Users/kevin/Desktop/V01_S0308_I00001235_P1618.mp4"]
+        self.cropped_files = ["/Users/kevin/Desktop/V01_S0308_I00001235_P1618_cropped.mp4"]
 
         # # Walk through all folders and subfolders
         # for folder_path, subfolders, files in os.walk(root_dir):
@@ -93,58 +93,6 @@ class VideoCropper(object):
         #             os.makedirs(video_output_dir, exist_ok=True)
         #             output_path = video_output_dir / file
         #             self.cropped_files.append(output_path)
-
-    # def load_resume_files(self):
-    #     resume_input_paths = []
-    #     resume_output_paths = []
-    #
-    #     raw_video_list = []
-    #     raw_video_dir = \
-    #         "/lustre/projects/Research_Project-T127204/xk219/projects/datasets/source_data/react-2025"
-    #     # cropped_video_list = []
-    #     # cropped_video_dir = \
-    #     #     "/lustre/projects/Research_Project-T127204/xk219/projects/datasets/source_data/react-2025-cropped"
-    #
-    #     for folder_path, subfolders, files in os.walk(raw_video_dir):
-    #         if len(files) > 0:
-    #             video_path = [os.path.join(folder_path, file) for file in files]
-    #             raw_video_list.extend(video_path)
-    #
-    #     # for folder_path, subfolders, files in os.walk(cropped_video_dir):
-    #     #     if len(files) > 0:
-    #     #         video_path = [os.path.join(folder_path, file) for file in files]
-    #     #         cropped_video_list.extend(video_path)
-    #
-    #     # for raw_video_path in raw_video_list:
-    #     #     cropped_video_id = raw_video_path.replace("react-2025", "react-2025-cropped")
-    #     #     if cropped_video_id not in cropped_video_list:
-    #     #         resume_input_paths.append(raw_video_path)
-    #     #         resume_output_paths.append(cropped_video_id)
-    #
-    #     video_processed_list = []
-    #     log_path = "/lustre/projects/Research_Project-T127204/xk219/projects/Human-AI/master/MAFRG/scripts/face.out"
-    #     with open(log_path) as file:
-    #         for line in file:
-    #             if "Finished processing" in line:
-    #                 if "no face detected!" in line:
-    #                     line = line.replace("no face detected!", "")
-    #                 # list = line.strip().split(" ")
-    #                 try:
-    #                     _, _, raw_video_path, _, cropped_video_path = line.strip().split(" ")
-    #                 except Exception as e:
-    #                     error_type = type(e).__name__
-    #                     print(f"Error processing {raw_video_path}: {error_type}: {e}")
-    #                     # print(f"line content: {line.strip()}")
-    #                 video_processed_list.append(raw_video_path)
-    #     file.close()
-    #
-    #     for raw_video_path in raw_video_list:
-    #         if raw_video_path not in video_processed_list:
-    #             resume_input_paths.append(raw_video_path)
-    #             resume_output_paths.append(raw_video_path.replace("react-2025", "react-2025-cropped"))
-    #
-    #     self.video_files = resume_input_paths
-    #     self.cropped_files = resume_output_paths
 
     def get_face_bbox(self, image, face_detector=None):
         h, w, _ = image.shape
@@ -229,7 +177,7 @@ class VideoCropper(object):
                 pbar = tqdm(total=num_frames, desc="Processing Frames",
                             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]")
 
-                maximum_frame_count = 300
+                maximum_frame_count = 100
                 frame_count = 0
                 while cap.isOpened():
                     ret, frame = cap.read()
@@ -364,16 +312,15 @@ def main(args):
     scale = args.scale
     do_padding = args.do_padding
     num_workers = args.num_workers
-    # error_file_path = output_dir + "/error_log.txt"
 
-    video_cropper = VideoCropper(root_dir=root_dir,
-                                 output_dir=output_dir,
-                                 target_size=target_size,
-                                 scale=scale,
-                                 do_padding=do_padding,
-                                 num_workers=num_workers,)
-    # # TODO if resume:
-    # video_cropper.load_resume_files()
+    video_cropper = VideoCropper(
+        root_dir=root_dir,
+        output_dir=output_dir,
+        target_size=target_size,
+        scale=scale,
+        do_padding=do_padding,
+        num_workers=num_workers,
+    )
 
     video_files = video_cropper.video_files
     cropped_files = video_cropper.cropped_files
@@ -417,7 +364,7 @@ def main(args):
 
 
 def check_frame_size():
-    src_video_path = "C:/Users/herui/Downloads/V01_S1881_I00000189_P2767_cropped.mp4"
+    src_video_path = "/path/to/V01_S1881_I00000189_P2767_cropped.mp4"
     cap = cv2.VideoCapture(src_video_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -429,18 +376,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='face cropping')
     # root_dir: path/to/react-2025
     parser.add_argument('--root_dir', type=str,
-    # default='/home/kevin/Kevin-research/Datasets/react-2025',
-    # default='/lustre/projects/Research_Project-T127204/xk219/projects/datasets/demo/react-2025',
-    default='/lustre/projects/Research_Project-T127204/xk219/projects/datasets/source_data/react-2025',
+                        default='',
                         help="root directory")
     # output_dir: path/to/react-2025-cropped
     parser.add_argument('--output_dir', type=str,
-    # default='/home/kevin/Kevin-research/Datasets/react-2025-cropped',
-    # default='/lustre/projects/Research_Project-T127204/xk219/projects/datasets/demo/react-2025-cropped',
-    default='/lustre/projects/Research_Project-T127204/xk219/projects/datasets/source_data/react-2025-cropped',
+                        default='',
                         help="output directory")
     parser.add_argument('--target_size', type=int,
-                        default=384, help="target video frame size")
+                        default=512, help="target video frame size")
     parser.add_argument('--scale', type=float, default=1.5,
                         help="scale of face bounding box")
     parser.add_argument('--do_padding', type=bool, default=False,
@@ -451,3 +394,56 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args)
+
+
+    # def load_resume_files(self):
+    #     resume_input_paths = []
+    #     resume_output_paths = []
+    #
+    #     raw_video_list = []
+    #     raw_video_dir = \
+    #         "/lustre/projects/Research_Project-T127204/xk219/projects/datasets/source_data/react-2025"
+    #     # cropped_video_list = []
+    #     # cropped_video_dir = \
+    #     #     "/lustre/projects/Research_Project-T127204/xk219/projects/datasets/source_data/react-2025-cropped"
+    #
+    #     for folder_path, subfolders, files in os.walk(raw_video_dir):
+    #         if len(files) > 0:
+    #             video_path = [os.path.join(folder_path, file) for file in files]
+    #             raw_video_list.extend(video_path)
+    #
+    #     # for folder_path, subfolders, files in os.walk(cropped_video_dir):
+    #     #     if len(files) > 0:
+    #     #         video_path = [os.path.join(folder_path, file) for file in files]
+    #     #         cropped_video_list.extend(video_path)
+    #
+    #     # for raw_video_path in raw_video_list:
+    #     #     cropped_video_id = raw_video_path.replace("react-2025", "react-2025-cropped")
+    #     #     if cropped_video_id not in cropped_video_list:
+    #     #         resume_input_paths.append(raw_video_path)
+    #     #         resume_output_paths.append(cropped_video_id)
+    #
+    #     video_processed_list = []
+    #     log_path = "/lustre/projects/Research_Project-T127204/xk219/projects/Human-AI/master/MAFRG/scripts/face.out"
+    #     with open(log_path) as file:
+    #         for line in file:
+    #             if "Finished processing" in line:
+    #                 if "no face detected!" in line:
+    #                     line = line.replace("no face detected!", "")
+    #                 # list = line.strip().split(" ")
+    #                 try:
+    #                     _, _, raw_video_path, _, cropped_video_path = line.strip().split(" ")
+    #                 except Exception as e:
+    #                     error_type = type(e).__name__
+    #                     print(f"Error processing {raw_video_path}: {error_type}: {e}")
+    #                     # print(f"line content: {line.strip()}")
+    #                 video_processed_list.append(raw_video_path)
+    #     file.close()
+    #
+    #     for raw_video_path in raw_video_list:
+    #         if raw_video_path not in video_processed_list:
+    #             resume_input_paths.append(raw_video_path)
+    #             resume_output_paths.append(raw_video_path.replace("react-2025", "react-2025-cropped"))
+    #
+    #     self.video_files = resume_input_paths
+    #     self.cropped_files = resume_output_paths
