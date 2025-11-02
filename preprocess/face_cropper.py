@@ -71,8 +71,8 @@ class VideoCropper(object):
             # '.mov', '.mkv', '.wmv', '.flv', '.webm', '.m4v', '.mpg', '.mpeg', '.3gp', '.ts'
         }
 
-        self.video_files = ["/Users/kevin/Desktop/V01_S0308_I00001235_P1618.mp4"]
-        self.cropped_files = ["/Users/kevin/Desktop/V01_S0308_I00001235_P1618_cropped.mp4"]
+        self.video_files = ["/root/autodl-tmp/datasets/tmp/V01_S0308_I00001235_P1618.mp4"]
+        self.cropped_files = ["/root/autodl-tmp/datasets/tmp/V01_S0308_I00001235_P1618_cropped.mp4"]
 
         # # Walk through all folders and subfolders
         # for folder_path, subfolders, files in os.walk(root_dir):
@@ -127,6 +127,132 @@ class VideoCropper(object):
         else:
             raise NotImplementedError
         return old_size, center
+
+    def compute_stable_crop_region(self, all_left, all_right, all_top, all_bottom,
+                                   frame_width, frame_height):
+        """
+        使用鲁棒统计方法计算稳定的裁剪区域
+        保持裁剪框大小不变，但选择最优的中心位置
+        """
+        # 过滤掉无效检测（-1值）
+        valid_indices = [i for i in range(len(all_left)) if all_left[i] > 0]
+        if len(valid_indices) == 0:
+            raise ValueError("No valid face detection found")
+
+        valid_left = [all_left[i] for i in valid_indices]
+        valid_right = [all_right[i] for i in valid_indices]
+        valid_top = [all_top[i] for i in valid_indices]
+        valid_bottom = [all_bottom[i] for i in valid_indices]
+
+        # 计算每帧的人脸中心点
+        center_x_list = [(l + r) / 2 for l, r in zip(valid_left, valid_right)]
+        center_y_list = [(t + b) / 2 for t, b in zip(valid_top, valid_bottom)]
+
+        # 计算人脸大小
+        face_widths = [r - l for l, r in zip(valid_left, valid_right)]
+        face_heights = [b - t for t, b in zip(valid_top, valid_bottom)]
+
+        # 使用中位数而不是平均值来获得更稳定的人脸大小
+        median_face_width = np.median(face_widths)
+        median_face_height = np.median(face_heights)
+        median_face_size = max(median_face_width, median_face_height)
+
+        # 计算稳定的中心位置（使用trimmed mean去除极端值）
+        stable_center_x = self.calculate_trimmed_mean(center_x_list, trim_percent=0.1)
+        stable_center_y = self.calculate_trimmed_mean(center_y_list, trim_percent=0.1)
+
+        # 应用缩放因子计算最终的裁剪框大小
+        self.crop_size = int(median_face_size * self.scale)
+
+        # 确保裁剪框不小于目标大小
+        if self.crop_size < self.target_size:
+            self.crop_size = self.target_size
+
+        # 基于稳定中心计算裁剪边界
+        left = int(stable_center_x - self.crop_size / 2)
+        top = int(stable_center_y - self.crop_size / 2)
+        right = left + self.crop_size
+        bottom = top + self.crop_size
+
+        # 边界检查和调整
+        if left < 0:
+            left = 0
+            right = self.crop_size
+        if top < 0:
+            top = 0
+            bottom = self.crop_size
+        if right > frame_width:
+            right = frame_width
+            left = frame_width - self.crop_size
+        if bottom > frame_height:
+            bottom = frame_height
+            top = frame_height - self.crop_size
+
+        return left, top, right, bottom
+
+    def calculate_trimmed_mean(self, values, trim_percent=0.1):
+        """
+        计算截尾均值，去除最高和最低的一定百分比的值
+        这种方法比简单平均更能抵抗异常值的影响
+        """
+        if len(values) == 0:
+            return 0
+
+        sorted_values = sorted(values)
+        trim_count = int(len(sorted_values) * trim_percent)
+
+        # 如果数据点太少，至少去除最大和最小值各一个
+        if trim_count == 0 and len(sorted_values) > 2:
+            trim_count = 1
+
+        if trim_count > 0:
+            trimmed_values = sorted_values[trim_count:-trim_count]
+        else:
+            trimmed_values = sorted_values
+
+        return sum(trimmed_values) / len(trimmed_values) if trimmed_values else sum(sorted_values) / len(sorted_values)
+
+    def interpolate_missing_detections(self, all_left, all_right, all_top, all_bottom):
+        """
+        对缺失的检测结果进行智能插值
+        """
+        n_frames = len(all_left)
+
+        # 找出所有有效检测的索引
+        valid_indices = [i for i in range(n_frames) if all_left[i] > 0]
+
+        if len(valid_indices) < 2:
+            # 有效检测太少，无法插值
+            return all_left, all_right, all_top, all_bottom
+
+        # 对每个无效检测进行插值
+        for i in range(n_frames):
+            if all_left[i] <= 0:  # 无效检测
+                # 找到前后最近的有效检测
+                prev_valid = max([idx for idx in valid_indices if idx < i], default=None)
+                next_valid = min([idx for idx in valid_indices if idx > i], default=None)
+
+                if prev_valid is not None and next_valid is not None:
+                    # 线性插值
+                    alpha = (i - prev_valid) / (next_valid - prev_valid)
+                    all_left[i] = all_left[prev_valid] * (1 - alpha) + all_left[next_valid] * alpha
+                    all_right[i] = all_right[prev_valid] * (1 - alpha) + all_right[next_valid] * alpha
+                    all_top[i] = all_top[prev_valid] * (1 - alpha) + all_top[next_valid] * alpha
+                    all_bottom[i] = all_bottom[prev_valid] * (1 - alpha) + all_bottom[next_valid] * alpha
+                elif prev_valid is not None:
+                    # 使用前一个有效值
+                    all_left[i] = all_left[prev_valid]
+                    all_right[i] = all_right[prev_valid]
+                    all_top[i] = all_top[prev_valid]
+                    all_bottom[i] = all_bottom[prev_valid]
+                elif next_valid is not None:
+                    # 使用后一个有效值
+                    all_left[i] = all_left[next_valid]
+                    all_right[i] = all_right[next_valid]
+                    all_top[i] = all_top[next_valid]
+                    all_bottom[i] = all_bottom[next_valid]
+
+        return all_left, all_right, all_top, all_bottom
 
     def face_cropping(self, input_paths, output_paths, record_queue):
         """
@@ -213,8 +339,8 @@ class VideoCropper(object):
 
                 cap.release()
                 assert len(all_left) > 0, "No face detected in video: {}".format(input_path)
-                self.crop_size = max_size
 
+                self.crop_size = max_size
                 # compute average of face boundaries
                 left = int(sum(all_left) / len(all_left))
                 top = int(sum(all_top) / len(all_top))
@@ -260,6 +386,17 @@ class VideoCropper(object):
                 if bottom > frame_height:
                     bottom = frame_height
                     top = frame_height - self.crop_size
+
+                # TODO debug [Modification]
+                # # 先进行插值处理缺失的检测
+                # all_left, all_right, all_top, all_bottom = self.interpolate_missing_detections(
+                #     all_left, all_right, all_top, all_bottom
+                # )
+                # # 使用新的稳定计算方法
+                # left, top, right, bottom = self.compute_stable_crop_region(
+                #     all_left, all_right, all_top, all_bottom,
+                #     frame_width, frame_height
+                # )
 
                 # write video to /output_path
                 self.video_write(input_path, output_path, left, right, top, bottom)
